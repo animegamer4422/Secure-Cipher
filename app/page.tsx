@@ -1,5 +1,7 @@
 'use client';
 import React, { useState } from 'react';
+import AES from 'crypto-js/aes';
+import Utf8 from 'crypto-js/enc-utf8';
 import Header from './components/Header.client';
 import PasswordInput from './components/PasswordInput.client';
 import Output from './components/Output.client';
@@ -10,20 +12,27 @@ const Home: React.FC = () => {
   const [password, setPassword] = useState('');
   const [output, setOutput] = useState('');
 
-
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
+  const handleEncrypt = () => {
+    if (!password) {
+      alert('Please enter a password.');
+      return;
+    }
+    const encrypted = AES.encrypt(encryptInput, password).toString();
+    setOutput(encrypted);
   };
 
-  // Simple encryption/decryption placeholder functions
-  const encryptText = (text: string) => {
-    // This should be replaced with actual encryption logic
-    return `Encrypted: ${text} with password: ${password}`;
-  };
-
-  const decryptText = (text: string) => {
-    // This should be replaced with actual decryption logic
-    return `Decrypted: ${text} with password: ${password}`;
+  const handleDecrypt = () => {
+    if (!password) {
+      alert('Please enter a password.');
+      return;
+    }
+    try {
+      const bytes = AES.decrypt(decryptInput, password);
+      const decryptedText = bytes.toString(Utf8);
+      setOutput(decryptedText);
+    } catch (e) {
+      alert('Failed to decrypt. Check your password and try again.');
+    }
   };
 
   return (
@@ -42,7 +51,7 @@ const Home: React.FC = () => {
                   value={encryptInput}
                   onChange={(e) => setEncryptInput(e.target.value)}
                 ></textarea>
-                <button className="btn mt-4" onClick={() => setOutput(encryptText(encryptInput))}>Encrypt</button>
+                <button className="btn mt-4" onClick={handleEncrypt}>Encrypt</button>
               </div>
             </div>
           </div>
@@ -61,24 +70,20 @@ const Home: React.FC = () => {
                   value={decryptInput}
                   onChange={(e) => setDecryptInput(e.target.value)}
                 ></textarea>
-                <button className="btn mt-4" onClick={() => setOutput(decryptText(decryptInput))}>Decrypt</button>
+                <button className="btn mt-4" onClick={handleDecrypt}>Decrypt</button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Password Section */}
-
         <PasswordInput
-      password={password}
-      onPasswordChange={handlePasswordChange}
-    />
-
+          password={password}
+          onPasswordChange={(e) => setPassword(e.target.value)}
+        />
 
         {/* Output Section */}
-        <div className="card bg-base-200 mt-4">
-        <Output output={''} />
-        </div>
+        <Output output={output} />
       </div>
     </div>
   );

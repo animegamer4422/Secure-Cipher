@@ -11,7 +11,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ password, onPasswordChang
       <div className="card bg-base-300 rounded-box place-items-center p-4 w-full">
         <div className="grid place-items-center w-full">
           <span className="text-lg font-bold">Password for Encryption/Decryption</span>
-          <input 
+          <input
             type="password" 
             className="input input-bordered border-4 w-11/12 md:w-5/6 h-auto mt-2"
             placeholder="Enter password"
