@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import Header from './components/Header.client';
+import PasswordInput from './components/PasswordInput.client';
+import Output from './components/Output.client';
 
 const Home: React.FC = () => {
   const [encryptInput, setEncryptInput] = useState('');
@@ -59,32 +61,15 @@ const Home: React.FC = () => {
         </div>
 
         {/* Password Section */}
-        <div className="flex flex-col md:flex-row md:justify-center md:w-full mt-4">
-          <div className="card bg-base-300 rounded-box place-items-center p-4 w-full">
-            <div className="grid place-items-center w-full">
-              <span className="text-lg font-bold">Password for Encryption/Decryption</span>
-              <input 
-                type="password" 
-                className="input input-bordered border-4 w-11/12 md:w-5/6 h-auto mt-2"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
+
+        <PasswordInput password={''} onPasswordChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+            throw new Error('Function not implemented.');
+          } } />
+
 
         {/* Output Section */}
         <div className="card bg-base-200 mt-4">
-          <div className="card-body">
-            <h2 className="card-title">Output</h2>
-            <textarea
-              placeholder="Output will be shown here"
-              className="textarea textarea-bordered border-4 w-11/12 md:w-full min-h-[10rem] md:min-h-[8rem]"
-              readOnly
-              value={output}
-            ></textarea>
-          </div>
+        <Output output={''} />
         </div>
       </div>
     </div>
