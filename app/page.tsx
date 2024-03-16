@@ -40,6 +40,7 @@ const Home: React.FC = () => {
       <Header />
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
+          
           {/* Encryption Section */}
           <div className="flex-1">
             <div className="card bg-base-300 rounded-box place-items-center p-4 mb-4">

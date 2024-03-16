@@ -1,35 +1,38 @@
 // components/Header.client.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Header = () => {
-  // State to manage if the retro theme is active or not
-  const [isRetro, setIsRetro] = useState(() => {
-    // Get the theme from localStorage or default to false if not found
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'retro';
-  });
+const Header: React.FC = () => {
 
-  // Update the theme whenever the isRetro state changes
+  const [theme, setTheme] = useState("dracula"); // Default theme is emerald
+
   useEffect(() => {
-    const theme = isRetro ? 'retro' : 'default'; // Assuming 'default' is your default theme
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme); // Save the theme preference to localStorage
-  }, [isRetro]);
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
 
-  // Handler to toggle the theme based on the checkbox
-  const handleThemeToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsRetro(e.target.checked);
+  const toggleTheme = () => {
+    const newTheme = theme === "dracula" ? "retro" : "dracula";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   return (
     <header className="flex justify-between items-center p-4">
       <h1 className="text-xl">Secure Cipher</h1>
-      <input 
-        type="checkbox" 
-        checked={isRetro} 
-        onChange={handleThemeToggle} 
-        className="toggle theme-controller"
-      />
+      <label className="toggle-label">
+      <input
+              id="toggle-theme-checkbox"
+              type="checkbox"
+              checked={theme === "retro"}
+              value="retro"
+              onChange={toggleTheme}
+              className="toggle theme-controller"
+            />
+        <span className="toggle-mark"></span>
+      </label>
     </header>
   );
 };

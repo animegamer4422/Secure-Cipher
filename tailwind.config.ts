@@ -17,7 +17,7 @@ const config: Config = {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["dracula", "retro", "aqua"],
+    themes: ["dracula", "retro"],
   },
 };
 export default config;
