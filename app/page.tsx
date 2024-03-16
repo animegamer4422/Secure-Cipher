@@ -10,13 +10,20 @@ const Home: React.FC = () => {
   const [password, setPassword] = useState('');
   const [output, setOutput] = useState('');
 
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
   // Simple encryption/decryption placeholder functions
   const encryptText = (text: string) => {
-    return `Encrypted: ${text} with ${password}`;
+    // This should be replaced with actual encryption logic
+    return `Encrypted: ${text} with password: ${password}`;
   };
 
   const decryptText = (text: string) => {
-    return `Decrypted: ${text} with ${password}`;
+    // This should be replaced with actual decryption logic
+    return `Decrypted: ${text} with password: ${password}`;
   };
 
   return (
@@ -62,9 +69,10 @@ const Home: React.FC = () => {
 
         {/* Password Section */}
 
-        <PasswordInput password={''} onPasswordChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-            throw new Error('Function not implemented.');
-          } } />
+        <PasswordInput
+      password={password}
+      onPasswordChange={handlePasswordChange}
+    />
 
 
         {/* Output Section */}
