@@ -1,21 +1,21 @@
-import React from 'react';
-
 interface OutputProps {
   output: string;
+  onCopySuccess: () => void;
+  copyButtonText: string; // New prop
 }
 
-const Output: React.FC<OutputProps> = ({ output }) => {
+const Output: React.FC<OutputProps> = ({ output, onCopySuccess, copyButtonText }) => {
   const copyToClipboard = async () => {
     if ('clipboard' in navigator) {
       await navigator.clipboard.writeText(output);
-      alert('Copied to clipboard!');
+      onCopySuccess(); // Call the success handler instead of alert
     } else {
       console.error('Clipboard access not available.');
     }
   };
 
   return (
-    <div className="card bg-base-300 mt-4 rounded-box ">
+    <div className="card bg-base-300 mt-4 rounded-box">
       <div className="card-body">
         <h2 className="card-title">Output</h2>
         <textarea
@@ -25,9 +25,9 @@ const Output: React.FC<OutputProps> = ({ output }) => {
           value={output}
         ></textarea>
         <div className="flex justify-center mt-4">
-          <button className="btn btn-outline" onClick={copyToClipboard}>
-            Copy
-          </button>
+        <button className="btn btn-outline" onClick={copyToClipboard}>
+        {copyButtonText}
+    </button>
         </div>
       </div>
     </div>
