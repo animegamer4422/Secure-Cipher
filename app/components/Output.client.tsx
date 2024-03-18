@@ -5,6 +5,15 @@ interface OutputProps {
 }
 
 const Output: React.FC<OutputProps> = ({ output }) => {
+  const copyToClipboard = async () => {
+    if ('clipboard' in navigator) {
+      await navigator.clipboard.writeText(output);
+      alert('Copied to clipboard!');
+    } else {
+      console.error('Clipboard access not available.');
+    }
+  };
+
   return (
     <div className="card bg-base-200 mt-4">
       <div className="card-body">
@@ -15,6 +24,11 @@ const Output: React.FC<OutputProps> = ({ output }) => {
           readOnly
           value={output}
         ></textarea>
+        <button className="btn mt-4"
+          onClick={copyToClipboard}
+        >
+          Copy to Clipboard
+        </button>
       </div>
     </div>
   );
