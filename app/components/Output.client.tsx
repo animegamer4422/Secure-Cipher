@@ -15,20 +15,20 @@ const Output: React.FC<OutputProps> = ({ output }) => {
   };
 
   return (
-    <div className="card bg-base-200 mt-4">
+    <div className="card bg-base-300 mt-4 rounded-box ">
       <div className="card-body">
         <h2 className="card-title">Output</h2>
         <textarea
           placeholder="Output will be shown here"
-          className="textarea textarea-bordered border-4 w-11/12 md:w-full min-h-[10rem] md:min-h-[8rem]"
+          className="textarea textarea-bordered border-4 w-11/12 md:w-full h-auto min-h-[8rem] mt-2"
           readOnly
           value={output}
         ></textarea>
-        <button className="btn mt-4"
-          onClick={copyToClipboard}
-        >
-          Copy to Clipboard
-        </button>
+        <div className="flex justify-center mt-4">
+          <button className="btn btn-outline" onClick={copyToClipboard}>
+            Copy
+          </button>
+        </div>
       </div>
     </div>
   );

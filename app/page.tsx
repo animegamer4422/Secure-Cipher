@@ -46,13 +46,13 @@ const Home: React.FC = () => {
             <div className="card bg-base-300 rounded-box place-items-center p-4 mb-4">
               <div className="grid place-items-center w-full">
                 <span className="text-lg font-bold">Encrypt Text</span>
-                <textarea 
+                <textarea
                   className="textarea textarea-bordered border-4 w-11/12 md:w-full h-auto min-h-[8rem] mt-2" 
                   placeholder="Enter text to encrypt"
                   value={encryptInput}
                   onChange={(e) => setEncryptInput(e.target.value)}
                 ></textarea>
-                <button className="btn mt-4" onClick={handleEncrypt}>Encrypt</button>
+                <button className="btn mt-4 btn-outline" onClick={handleEncrypt}>Encrypt</button>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ const Home: React.FC = () => {
                   value={decryptInput}
                   onChange={(e) => setDecryptInput(e.target.value)}
                 ></textarea>
-                <button className="btn mt-4" onClick={handleDecrypt}>Decrypt</button>
+                <button className="btn mt-4 btn-outline" onClick={handleDecrypt}>Decrypt</button>
               </div>
             </div>
           </div>
