@@ -89,6 +89,10 @@ const handleDecrypt = () => {
       <Header />
         {showAlert && <AlertDialog message={alertMessage} onClose={() => setShowAlert(false)} />}
         {showSuccess && <SuccessDialog message={successMessage} onClose={() => setShowSuccess(false)} />}
+        <PasswordInput
+          password={password}
+          onPasswordChange={(e) => setPassword(e.target.value)}
+        />
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
           <div className="flex-1">
@@ -121,10 +125,6 @@ const handleDecrypt = () => {
             </div>
           </div>
         </div>
-        <PasswordInput
-          password={password}
-          onPasswordChange={(e) => setPassword(e.target.value)}
-        />
         <Output 
     output={output} 
     copyButtonText={copyButtonText}
