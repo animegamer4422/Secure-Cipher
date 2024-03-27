@@ -1,7 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import AES from 'crypto-js/aes';
-import Utf8 from 'crypto-js/enc-utf8';
 import Header from './components/Header.client';
 import PasswordInput from './components/PasswordInput.client';
 import Output from './components/Output.client';
@@ -29,6 +27,48 @@ const SuccessDialog: React.FC<AlertDialogProps> = ({ message, onClose }) => {
   );
 };
 
+const encode = (text: string): Uint8Array => {
+  return new TextEncoder().encode(text);
+};
+
+const decode = (buffer: ArrayBuffer): string => {
+  return new TextDecoder().decode(buffer);
+};
+
+const getPasswordKey = async (password: string): Promise<CryptoKey> => {
+  const encoded = encode(password);
+  return window.crypto.subtle.importKey(
+    'raw',
+    encoded,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+};
+
+const deriveKey = async (passwordKey: CryptoKey, salt: Uint8Array, keyUsage: KeyUsage[]): Promise<CryptoKey> => {
+  return window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    passwordKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    keyUsage
+  );
+};
+
+const uint8ArrayToBase64 = (bytes: Uint8Array): string => {
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+};
+
 const Home: React.FC = () => {
   const [encryptInput, setEncryptInput] = useState('');
   const [decryptInput, setDecryptInput] = useState('');
@@ -42,57 +82,94 @@ const Home: React.FC = () => {
   const [decryptButtonText, setDecryptButtonText] = useState('Decrypt');
   const [copyButtonText, setCopyButtonText] = useState('Copy');
 
-
-
-  const handleEncrypt = () => {
+  const handleEncrypt = async () => {
     if (!password) {
-        setAlertMessage('Please enter a password.');
-        setShowAlert(true);
-        setShowSuccess(false);
-        return;
-    }
-
-    const encrypted = AES.encrypt(encryptInput, password).toString();
-    setOutput(encrypted);
-    setShowAlert(false);
-    setSuccessMessage('Your data has been encrypted.');
-    setShowSuccess(true);
-    setEncryptButtonText('Encrypted'); // Update button text
-    setTimeout(() => setEncryptButtonText('Encrypt'), 2000); // Reset after 2 seconds
-};
-
-const handleDecrypt = () => {
-    if (!password) {
-        setAlertMessage('Please enter a password.');
-        setShowAlert(true);
-        setShowSuccess(false);
-        return;
+      setAlertMessage('Please enter a password.');
+      setShowAlert(true);
+      setShowSuccess(false);
+      return;
     }
     try {
-        const bytes = AES.decrypt(decryptInput, password);
-        const decryptedText = bytes.toString(Utf8);
-        setOutput(decryptedText);
-        setShowAlert(false);
-        setSuccessMessage('Your data has been decrypted.');
-        setShowSuccess(true);
-        setDecryptButtonText('Decrypted'); // Update button text
-        setTimeout(() => setDecryptButtonText('Decrypt'), 2000); // Reset after 2 seconds
-    } catch (e) {
-        setAlertMessage('Failed to decrypt. Check your password and try again.');
-        setShowAlert(true);
-        setShowSuccess(false);
+      const passwordKey = await getPasswordKey(password);
+      const salt = window.crypto.getRandomValues(new Uint8Array(16));
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveKey(passwordKey, salt, ['encrypt']);
+
+      const encoded = encode(encryptInput);
+      const encrypted = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        encoded
+      );
+
+      const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+      combined.set(salt, 0);
+      combined.set(iv, salt.length);
+      combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+      const base64CipherText = uint8ArrayToBase64(combined);
+      setOutput(base64CipherText);
+      setShowAlert(false);
+      setSuccessMessage('Your data has been encrypted.');
+      setShowSuccess(true);
+      setEncryptButtonText('Encrypted');
+      setTimeout(() => setEncryptButtonText('Encrypt'), 2000);
+    } catch (error) {
+      setAlertMessage('Encryption failed. Please try again.');
+      setShowAlert(true);
+      setShowSuccess(false);
     }
-};
+  };
+
+  const handleDecrypt = async () => {
+    if (!password) {
+      setAlertMessage('Please enter a password.');
+      setShowAlert(true);
+      setShowSuccess(false);
+      return;
+    }
+
+    try {
+      const combined = Uint8Array.from(atob(decryptInput), c => c.charCodeAt(0));
+      const salt = combined.slice(0, 16);
+      const iv = combined.slice(16, 28);
+      const data = combined.slice(28);
+
+      const passwordKey = await getPasswordKey(password);
+      const key = await deriveKey(passwordKey, salt, ['decrypt']);
+
+      const decrypted = await window.crypto.subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv,
+        },
+        key,
+        data
+      );
+
+      const decryptedText = decode(decrypted);
+      setOutput(decryptedText);
+      setShowAlert(false);
+      setSuccessMessage('Your data has been decrypted.');
+      setShowSuccess(true);
+      setDecryptButtonText('Decrypted');
+      setTimeout(() => setDecryptButtonText('Decrypt'), 2000);
+    } catch (error) {
+      setAlertMessage('Failed to decrypt. Check your password and try again.');
+      setShowAlert(true);
+      setShowSuccess(false);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
       <Header />
-        {showAlert && <AlertDialog message={alertMessage} onClose={() => setShowAlert(false)} />}
-        {showSuccess && <SuccessDialog message={successMessage} onClose={() => setShowSuccess(false)} />}
-        <PasswordInput
-          password={password}
-          onPasswordChange={(e) => setPassword(e.target.value)}
-        />
+      {showAlert && <AlertDialog message={alertMessage} onClose={() => setShowAlert(false)} />}
+      {showSuccess && <SuccessDialog message={successMessage} onClose={() => setShowSuccess(false)} />}
+      <PasswordInput
+        password={password}
+        onPasswordChange={(e) => setPassword(e.target.value)}
+      />
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
           <div className="flex-1">
@@ -126,15 +203,15 @@ const handleDecrypt = () => {
           </div>
         </div>
         <Output 
-    output={output} 
-    copyButtonText={copyButtonText}
-    onCopySuccess={() => {
-        setSuccessMessage('Copied to clipboard!');
-        setShowSuccess(true);
-        setCopyButtonText('Copied');
-        setTimeout(() => setCopyButtonText('Copy'), 2000);
-    }} 
-/>
+          output={output} 
+          copyButtonText={copyButtonText}
+          onCopySuccess={() => {
+            setSuccessMessage('Copied to clipboard!');
+            setShowSuccess(true);
+            setCopyButtonText('Copied');
+            setTimeout(() => setCopyButtonText('Copy'), 2000);
+          }} 
+        />
       </div>
     </div>
   );
